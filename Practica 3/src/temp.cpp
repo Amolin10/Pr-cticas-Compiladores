@@ -1,6 +1,10 @@
 #include <iostream>
+#include <string>
 
 int main (  ) { 
+
+    std::string cadena = "Hola";
+
 
     int w, x, y , z;
     int i = 3; int j = 4;

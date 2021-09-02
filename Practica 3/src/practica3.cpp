@@ -1,9 +1,5 @@
-
-
-
 #include <iostream>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
 #define inicio 0
@@ -226,7 +222,7 @@ int main ( ) {
             
 
             case fin:
-                j = strlen(exprMate) + 1;
+                j = strlen(exprMate + 1);
                 res += "\n";
                 break;
 
