@@ -44,112 +44,108 @@ void escritura(std::string expresion) {
     fclose(arch); 
 }
 
+int automata (char c, std::vector<char> parentesis) {
+    if (c == '(') {
+        parentesis.push_back('(');
+        return Q1;
+    } else if (c == ')') {
+        parentesis.pop_back();
+        return Q2;
+    } else if (c == 92) {  // 92 = '\'
+        return Q3;
+    } else if (c == 'l') {
+        return Q4;
+    }
+    return -1;
+}
+
 
 int main ( ) {
     
     std::string traduccion;
-    std::string bandera;
-    std::string bandera2;
+    std::string acumulado;
+    std::string acumuladoAux;
+    std::string expresionM = leerM();
+    std::cout << "El contenido del archivo 'M.txt es:\t" << expresionM << "\n"; 
+
     int i = 0;
     int estado = Q0;
+
     int PcP = 0;
     int PcR = 0;
     int aux = 0;
+    int temp;
+    
     std::vector<char> parentesis;
 
-    std::string exprMate = leerM();
-    std::cout << "El contenido del archivo 'M.txt es:\t" << exprMate << "\n"; 
+    
 
-    for (int j = 0; j <= exprMate.size() + 1; j++) {
+    for (int j = 0; j <= expresionM.size() + 1; j++) {
         
         switch (estado) {
 
             case Q0:
-                if (exprMate[i] == '(') {
-                    parentesis.push_back('(');
-                    estado = Q1;
-                    break;
+                estado = automata(expresionM[i], parentesis);
+                if (estado == -1) {
+                    traduccion += expresionM[i];
+                    i++;
+                    j = i;
+                    estado = Q0;
                 }
-                
-                if (exprMate[i] == ')') {
-                    parentesis.pop_back();
-                    estado = Q2;
-                    break;
-                } 
-
-                if (exprMate[i] == 'l') {
-                    estado = Q3;
-                    break;
-                }
-
-                if (exprMate[i] == 92) {  // 92 = '\'
-                    estado = Q4;
-                    break;
-                }
-
-
-                traduccion += exprMate[i];
-                i++;
-                j = i;
                 break; 
                 
             case Q1:
                 i++;
-                {
-                    int aux = i;
-                    if (exprMate[i] == 92) {
-                        while(exprMate[i] != ')') {
-                            i++;
-                        }
-                        i = i + 2;
-                        if (exprMate[i] == '^') {
-                            traduccion += "pow(";
-                            parentesis.push_back('(');
-                            PcP = PcP + 1;
-                            i = aux;
-                            j = i;
-                            estado = Q0;
-                            break;
-                        } else {
-                            bandera2 = bandera;
-                            estado = Q0;
-                            i = aux;
-                            j = i;
-                            break;
-                        }
-                    }
-                    while(exprMate[i] != ')') {
+                temp = i;
+                if (expresionM[i] == 92) {
+                    while(expresionM[i] != ')') {
                         i++;
-                        if (i > exprMate.size()) {
-                            std::cout << "La expresión es incorrecta\n";
-                            return -1;
-                        }
                     }
-                    i++;
-                    if (exprMate[i] == '^') {
-                        traduccion += "pow((";
-                        parentesis.push_back('(');
+                    i = i + 2;
+                    if (expresionM[i] == '^') {
+                        traduccion += "pow(";
                         parentesis.push_back('(');
                         PcP = PcP + 1;
-                        i = aux;
-                        estado = Q0;
+                        i = temp;
                         j = i;
+                        estado = Q0;
                         break;
                     } else {
-                        traduccion += '(';
-                        parentesis.push_back('(');
-                        i = aux;
+                        acumuladoAux = acumulado;
                         estado = Q0;
+                        i = temp;
                         j = i;
                         break;
                     }
                 }
-
-
+                while(expresionM[i] != ')') {
+                    i++;
+                    if (i > expresionM.size()) {
+                        std::cout << "La expresión es incorrecta\n";
+                        return -1;
+                    }
+                }
+                i++;
+                if (expresionM[i] == '^') {
+                    traduccion += "pow((";
+                    parentesis.push_back('(');
+                    parentesis.push_back('(');
+                    PcP = PcP + 1;
+                    i = temp;
+                    estado = Q0;
+                    j = i;
+                    break;
+                } else {
+                    traduccion += '(';
+                    parentesis.push_back('(');
+                    i = temp;
+                    estado = Q0;
+                    j = i;
+                    break;
+                }
 
             case Q2:
-
-                if (PcP == 0 || (PcP == 0 && PcR == 0)) {
+                if (PcP == 0) {
                     if (aux >= 1) {
                         traduccion += ')';
                         traduccion += ')';
@@ -171,8 +167,8 @@ int main ( ) {
 
                 } else if (PcR >= 1) {
                     traduccion += "),(1/";
-                    traduccion += bandera;
-                    bandera.clear();
+                    traduccion += acumulado;
+                    acumulado.clear();
                     traduccion += ")";
                     parentesis.pop_back();
                     PcR--;
@@ -181,9 +177,9 @@ int main ( ) {
                     estado = Q0;
                     j = i;
                     break;
-                } else if (bandera2 != "0" && PcR >= 1) {
+                } else if (!acumuladoAux.empty() && PcR >= 1) {
                     traduccion += "),(1/";
-                    traduccion += bandera2;
+                    traduccion += acumuladoAux;
                     traduccion += "))";
                     parentesis.pop_back();
                     parentesis.pop_back();
@@ -204,28 +200,17 @@ int main ( ) {
                     break;
                 }
 
-
             case Q3:
-                traduccion += "log(";
-                parentesis.push_back('(');
-                i += 4;
-                j = i;
-                estado = Q0;
-                break;
-
-
-
-            case Q4:
                 i++;
-                if (exprMate[i] == '2') {
+                if (expresionM[i] == '2') {
                     traduccion += "sqrt";
                     i += 2;
                     j = i;
                     estado = Q0;
                     break;
                 } else {
-                    while (exprMate[i] != '/') {
-                        bandera += exprMate[i];
+                    while (expresionM[i] != '/') {
+                        acumulado += expresionM[i];
                         i++;
                     }
                 i++;
@@ -237,12 +222,16 @@ int main ( ) {
                 estado = Q0;
                 break;
                 }
-            
+
+            case Q4:
+                traduccion += "log(";
+                parentesis.push_back('(');
+                i += 4;
+                j = i;
+                estado = Q0;
+                break;
         }
 
     }
-    
-    
     escribirC(traduccion);
-
 }
