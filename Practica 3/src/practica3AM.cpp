@@ -59,7 +59,6 @@ int automata (char c, std::vector<char> parentesis) {
     return -1;
 }
 
-
 int main ( ) {
     
     std::string traduccion;
@@ -68,19 +67,18 @@ int main ( ) {
     std::string expresionM = leerM();
     std::cout << "El contenido del archivo 'M.txt es:\t" << expresionM << "\n"; 
 
-    int i = 0;
     int estado = Q0;
 
-    int PcP = 0;
-    int PcR = 0;
+    int potencias = 0;
+    int raices = 0;
     int aux = 0;
     int temp;
     
     std::vector<char> parentesis;
 
     
-
-    for (int j = 0; j <= expresionM.size() + 1; j++) {
+    int i = 0;
+    while (i < expresionM.size()) {
         
         switch (estado) {
 
@@ -89,7 +87,6 @@ int main ( ) {
                 if (estado == -1) {
                     traduccion += expresionM[i];
                     i++;
-                    j = i;
                     estado = Q0;
                 }
                 break; 
@@ -105,16 +102,14 @@ int main ( ) {
                     if (expresionM[i] == '^') {
                         traduccion += "pow(";
                         parentesis.push_back('(');
-                        PcP = PcP + 1;
+                        potencias = potencias + 1;
                         i = temp;
-                        j = i;
                         estado = Q0;
                         break;
                     } else {
                         acumuladoAux = acumulado;
                         estado = Q0;
                         i = temp;
-                        j = i;
                         break;
                     }
                 }
@@ -130,22 +125,20 @@ int main ( ) {
                     traduccion += "pow((";
                     parentesis.push_back('(');
                     parentesis.push_back('(');
-                    PcP = PcP + 1;
+                    potencias = potencias + 1;
                     i = temp;
                     estado = Q0;
-                    j = i;
                     break;
                 } else {
                     traduccion += '(';
                     parentesis.push_back('(');
                     i = temp;
                     estado = Q0;
-                    j = i;
                     break;
                 }
 
             case Q2:
-                if (PcP == 0) {
+                if (potencias == 0) {
                     if (aux >= 1) {
                         traduccion += ')';
                         traduccion += ')';
@@ -154,38 +147,34 @@ int main ( ) {
                         aux--;
                         i++;
                         estado = Q0;
-                        j = i;
                         break;
                     } else {
                         traduccion += ')';
                         parentesis.pop_back();
                         i++;
                         estado = Q0;
-                        j = i;
                         break;
                     }
 
-                } else if (PcR >= 1) {
+                } else if (raices >= 1) {
                     traduccion += "),(1/";
                     traduccion += acumulado;
                     acumulado.clear();
                     traduccion += ")";
                     parentesis.pop_back();
-                    PcR--;
-                    PcP--;
+                    raices--;
+                    potencias--;
                     i++;
                     estado = Q0;
-                    j = i;
                     break;
-                } else if (!acumuladoAux.empty() && PcR >= 1) {
+                } else if (!acumuladoAux.empty() && raices >= 1) {
                     traduccion += "),(1/";
                     traduccion += acumuladoAux;
                     traduccion += "))";
                     parentesis.pop_back();
                     parentesis.pop_back();
-                    PcR--;
+                    raices--;
                     i++;
-                    j = i;
                     estado = Q0;
                     break;
                 } else {
@@ -193,9 +182,8 @@ int main ( ) {
                     parentesis.pop_back();
                     traduccion += ',';
                     i = i + 2;
-                    j = i;
                     aux++;
-                    PcP--;
+                    potencias--;
                     estado = Q0;
                     break;
                 }
@@ -205,7 +193,6 @@ int main ( ) {
                 if (expresionM[i] == '2') {
                     traduccion += "sqrt";
                     i += 2;
-                    j = i;
                     estado = Q0;
                     break;
                 } else {
@@ -216,9 +203,8 @@ int main ( ) {
                 i++;
                 traduccion += "pow(";
                 parentesis.push_back('(');
-                PcR++;
-                PcP++;
-                j = i;
+                raices++;
+                potencias++;
                 estado = Q0;
                 break;
                 }
@@ -227,7 +213,6 @@ int main ( ) {
                 traduccion += "log(";
                 parentesis.push_back('(');
                 i += 4;
-                j = i;
                 estado = Q0;
                 break;
         }
